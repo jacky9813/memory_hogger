@@ -73,3 +73,14 @@ After the program has finished hogging memory, it'll hang until you send a
 signal (like Ctrl-C) to it, which will trigger program exit.
 
 Use `memory_hogger --help` to get all available configurations.
+
+
+> [!NOTE]
+> Memory Hogger will have about `(block count + 1) * 24` Bytes overhead.
+
+
+> [!IMPORTANT]
+> Extremely large block size will be much difficult to reserve, since the
+> underlying data structure needs to be continuous virtual memory space.
+> If you found weird behavior of Memory Hogger, try decrease the block size and
+> increase block count for reserving the same amount of memory space instead.
