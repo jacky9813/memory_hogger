@@ -12,4 +12,5 @@ repository = "https://github.com/jacky9813/memory_hogger"
 
 [dependencies]
 clap = { version = "4.6.0", features = ["derive"] }
+humansize = "2.1.3"
 signal-notify = "0.1.3"

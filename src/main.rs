@@ -1,4 +1,5 @@
 use clap::Parser;
+use humansize::{BINARY, format_size};
 use signal_notify::{Signal, notify};
 use std::thread;
 
@@ -17,6 +18,7 @@ mod memory_hogger {
         const SIZE: usize = 1024;
         let result = get_rand_bytes(SIZE);
         assert_eq!(result.len(), SIZE);
+        assert_eq!(std::mem::size_of_val(&*result), SIZE);
     }
 
     fn allocate_empty(s: usize) -> Vec<u8> {
@@ -29,6 +31,7 @@ mod memory_hogger {
         const SIZE: usize = 1024;
         let result = allocate_empty(SIZE);
         assert_eq!(result.len(), SIZE);
+        assert_eq!(std::mem::size_of_val(&*result), SIZE);
     }
 
     pub fn thread_worker(size: usize, count: usize, random_value: bool) -> Vec<Vec<u8>> {
@@ -81,17 +84,43 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let mut thread_pool = vec![];
-    let mut hogged = vec![];
-
-    println!("Block Size:        {}", args.block_size);
-    println!("Block Count:       {}", args.block_count);
-    println!("Fill Random Value: {}", args.fill_random);
-    println!("Threads:           {}", args.threads);
-
+    // args data validation
     if args.threads < 1 {
         panic!("--threads cannot be lower than 1");
     }
+
+    let mut thread_pool = vec![];
+    let mut hogged = vec![];
+    let value_size = args.block_count * args.block_size;
+    let vec_size = std::mem::size_of_val(&hogged);
+    let expected_overhead = vec_size * (args.block_count + 1);
+    let expected_hog_size = value_size + expected_overhead;
+
+    println!("Block Size:          {}", args.block_size);
+    println!("Value Block Count:   {}", args.block_count);
+    println!("Total Block Count:   {}", args.block_count + 1);
+    println!("Fill Random Value:   {}", args.fill_random);
+    println!("Threads:             {}", args.threads);
+    println!(
+        "Overhead Per Block:  {} Bytes ({})",
+        vec_size,
+        format_size(vec_size, BINARY)
+    );
+    println!(
+        "Total Value Size:    {} Bytes ({})",
+        value_size,
+        format_size(value_size, BINARY)
+    );
+    println!(
+        "Expected Overhead:   {} Bytes ({})",
+        expected_overhead,
+        format_size(expected_overhead, BINARY)
+    );
+    println!(
+        "Expected Total Size: {} Bytes ({})",
+        expected_hog_size,
+        format_size(expected_hog_size, BINARY)
+    );
 
     for _i in 0..(args.threads - 1) {
         thread_pool.push(thread::spawn(move || {
@@ -116,14 +145,19 @@ fn main() {
         hogged.extend(result);
     }
 
-    println!("Memory Hogged");
-
-    let expected_size = args.block_count * args.block_size;
     let hogged_size = memory_hogger::get_hogged_size(&hogged);
-    let size_overhead = hogged_size - expected_size;
-    println!("Expected Hog Size:  {expected_size} Bytes");
-    println!("Actual Hogged Size: {hogged_size} Bytes");
-    println!("Overhead:           {size_overhead} Bytes");
+    let size_overhead = hogged_size - value_size;
+    println!(
+        "Actual Overhead:     {} Bytes ({})",
+        size_overhead,
+        format_size(size_overhead, BINARY)
+    );
+    println!(
+        "Actual Hogged Size:  {} Bytes ({})",
+        hogged_size,
+        format_size(hogged_size, BINARY)
+    );
+    println!("Memory Hogged. Waiting a signal to stop...");
 
     // signal-notify doesn't provide an interface for converting integer into
     // Signal enums
