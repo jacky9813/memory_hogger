@@ -1,7 +1,9 @@
 use clap::Parser;
+use dialoguer::Confirm;
 use humansize::{BINARY, format_size};
 use signal_notify::{Signal, notify};
 use std::thread;
+use systemstat::{Platform, System};
 
 mod memory_hogger {
     use std::{fs, io::Read};
@@ -95,6 +97,13 @@ fn main() {
     let vec_size = std::mem::size_of_val(&hogged);
     let expected_overhead = vec_size * (args.block_count + 1);
     let expected_hog_size = value_size + expected_overhead;
+    let sys = System::new();
+    let mem_stat_r = sys.memory();
+
+    let free_mem_size = match mem_stat_r {
+        Ok(mem_stat) => mem_stat.free.as_u64() as usize,
+        Err(_) => 0_usize,
+    };
 
     println!("Block Size:          {}", args.block_size);
     println!("Value Block Count:   {}", args.block_count);
@@ -121,6 +130,24 @@ fn main() {
         expected_hog_size,
         format_size(expected_hog_size, BINARY)
     );
+    println!(
+        "System Free Memory:  {} Bytes ({})",
+        free_mem_size,
+        format_size(free_mem_size, BINARY)
+    );
+
+    if free_mem_size < expected_hog_size {
+        let prompt_resp = Confirm::new()
+            .with_prompt(
+                "WARNING: System free memory is lower than expected total memory. Continue?",
+            )
+            .interact()
+            .unwrap_or(false);
+        if !prompt_resp {
+            println!("Aborted");
+            return;
+        }
+    }
 
     for _i in 0..(args.threads - 1) {
         thread_pool.push(thread::spawn(move || {
@@ -161,7 +188,7 @@ fn main() {
 
     // signal-notify doesn't provide an interface for converting integer into
     // Signal enums
-    let signal = notify(&[
+    let signal_receiver = notify(&[
         Signal::HUP,
         Signal::INT,
         Signal::QUIT,
@@ -175,10 +202,7 @@ fn main() {
         Signal::USR1,
         Signal::USR2,
     ]);
-    match signal.recv() {
-        Ok(v) => println!("Received signal {v:?}"),
-        Err(e) => println!("Error: {e:?}"),
-    }
-
+    let signal = signal_receiver.recv().unwrap();
+    println!("Received signal {signal:?}");
     println!("Exiting");
 }
