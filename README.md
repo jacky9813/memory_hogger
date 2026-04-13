@@ -5,16 +5,44 @@ This program just hogs a bunch of memory and do nothing about it.
 This tool is absolutely useless except you want to create a high memory usage
 environment.
 
-
 Also, this is my first program written in rust.
 
 
-## Install
+## Build and Install
+
+To build this program, you'll need:
+
+* Rust compiler >= 1.85.0 (This project requires compilers that supports
+  2024 edition rust.)
+* Rust cargo package manager
+* Linux (this program require `/dev/urandom` and libc from `glibc` or `musl`).
+  These are the known distribution to support out of the box (by just install
+  `cargo` package):
+    * Debian 13 Trixie
+    * Fedora 43
+    * RedHat Enterprise Linux or compatible distros (tested on Rocky Linux):
+        * EL8 (requires `rust-toolset` DNF module to be enabled first)
+        * EL9
+        * EL10
+    * Ubuntu 25.10
+
+For Linux distribution that doesn't come with Rust compiler that supports 2024
+edition, remove the Rust toolchain from your Linux distro and install rust with
+[rustup.rs](https://rustup.rs/) instead.
 
 ```shell
 #!/bin/bash
-cargo install --git github.com/jacky9813/memory-hogger
+cargo install --git https://github.com/jacky9813/memory_hogger
 ```
+
+> [!NOTE]
+> You may need to export cargo installed binaries directory to `PATH` if you
+> haven't done so.
+>
+> ```shell
+> #!/bin/bash
+> export PATH="$PATH:$HOME/.cargo/bin"
+> ```
 
 ## Usage
 
