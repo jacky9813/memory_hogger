@@ -2,7 +2,7 @@ use clap::Parser;
 use dialoguer::Confirm;
 use humansize::{BINARY, format_size};
 use signal_notify::{Signal, notify};
-use std::thread;
+use std::{error, fmt, thread};
 use systemstat::{Platform, System};
 
 mod memory_hogger {
@@ -65,6 +65,23 @@ mod memory_hogger {
     }
 }
 
+#[derive(Clone)]
+struct AbortedError;
+
+impl fmt::Debug for AbortedError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "User aborted the operation")
+    }
+}
+
+impl fmt::Display for AbortedError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "User aborted the operation")
+    }
+}
+
+impl error::Error for AbortedError {}
+
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Args {
@@ -84,7 +101,7 @@ struct Args {
     threads: usize,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     // args data validation
     if args.threads < 1 {
@@ -147,8 +164,7 @@ fn main() {
             .interact()
             .unwrap_or(false);
         if !prompt_resp {
-            println!("Aborted");
-            return;
+            return Err(AbortedError {}.into());
         }
     }
 
@@ -208,4 +224,6 @@ fn main() {
     let signal = signal_receiver.recv().unwrap();
     println!("Received signal {signal:?}");
     println!("Exiting");
+
+    Ok(())
 }
