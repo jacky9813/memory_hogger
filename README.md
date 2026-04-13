@@ -29,11 +29,16 @@ There are 2 requires options:
 > fill memory from `/dev/urandom`. This will make use of the resident memory,
 > which is counted as actual memory usage.
 
+> [!TIP]
+> To enable faster memory allocation, use `--threads <INT>` or `-t <INT>` for
+> multi-threaded operation. This will have significant performance gains when
+> `--fill-random` option is used.
+
 Example:
 
 ```shell
 # Hog 1 GiB of memory.
-memory_hogger -s 1048576 -c 1024 -r
+memory_hogger -s 1048576 -c 1024 -t 8 -r
 ```
 
 After the program has finished hogging memory, it'll hang until you send a
