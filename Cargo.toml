@@ -1,0 +1,15 @@
+[package]
+name = "memory_hogger"
+version = "0.1.0"
+description = "Just hogs a bunch of memory space and does nothing about it."
+edition = "2024"
+publish = false
+license = "MIT"
+readme = "README.md"
+keywords = ["linux"]
+categories = ["command-line-utilities"]
+repository = "https://github.com/jacky9813/memory_hogger"
+
+[dependencies]
+clap = { version = "4.6.0", features = ["derive"] }
+signal-notify = "0.1.3"
