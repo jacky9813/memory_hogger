@@ -16,7 +16,7 @@ Also, this is my first program written in rust.
 cargo install --git github.com/jacky9813/memory-hogger
 ```
 
-## Usage 
+## Usage
 
 There are 2 requires options:
 

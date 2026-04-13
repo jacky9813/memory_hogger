@@ -1,6 +1,6 @@
-use std::thread;
 use clap::Parser;
-use signal_notify::{notify, Signal};
+use signal_notify::{Signal, notify};
+use std::thread;
 
 mod memory_hogger {
     use std::{fs, io::Read};
@@ -52,9 +52,9 @@ mod memory_hogger {
         for block_ref in hogged {
             let block_size = std::mem::size_of_val(&**block_ref);
             hogged_size += block_size;
-            hogged_size += std::mem::size_of_val(&*block_ref);
+            hogged_size += std::mem::size_of_val(block_ref);
         }
-        hogged_size += std::mem::size_of_val(&hogged);
+        hogged_size += std::mem::size_of_val(hogged);
 
         hogged_size
     }
@@ -93,25 +93,21 @@ fn main() {
         panic!("--threads cannot be lower than 1");
     }
 
-    for _i in 0..(args.threads - 1){
+    for _i in 0..(args.threads - 1) {
         thread_pool.push(thread::spawn(move || {
             let partitioned_count = args.block_count / args.threads;
-            let result = memory_hogger::thread_worker(
-                args.block_size,
-                partitioned_count,
-                args.fill_random);
-            result
+            memory_hogger::thread_worker(args.block_size, partitioned_count, args.fill_random)
         }));
         #[cfg(debug_assertions)]
         println!("Thread {_i} spawned");
     }
     thread_pool.push(thread::spawn(move || {
         let partitioned_count = (args.block_count / args.threads) * (args.threads - 1);
-        let result = memory_hogger::thread_worker(
+        memory_hogger::thread_worker(
             args.block_size,
             args.block_count - partitioned_count,
-            args.fill_random);
-        result
+            args.fill_random,
+        )
     }));
     #[cfg(debug_assertions)]
     println!("Last Thread spawned");
