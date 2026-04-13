@@ -102,7 +102,10 @@ fn main() {
 
     let free_mem_size = match mem_stat_r {
         Ok(mem_stat) => mem_stat.free.as_u64() as usize,
-        Err(_) => 0_usize,
+        Err(_) => {
+            println!("Failed to fetch system free memory");
+            0_usize
+        }
     };
 
     println!("Block Size:          {}", args.block_size);
