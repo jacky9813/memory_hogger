@@ -15,5 +15,7 @@ clap = { version = "4.6.0", features = ["derive"] }
 dialoguer = "0.12.0"
 humansize = "2.1.3"
 rand = "0.10.1"
-signal-notify = "0.1.3"
 systemstat = "0.2.6"
+
+[target."cfg(unix)".dependencies]
+signal-notify = "0.1.3"

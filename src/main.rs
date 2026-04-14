@@ -1,7 +1,6 @@
 use clap::Parser;
 use dialoguer::Confirm;
 use humansize::{BINARY, format_size};
-use signal_notify::{Signal, notify};
 use std::{error, fmt, thread, time};
 use systemstat::{Platform, System};
 
@@ -39,6 +38,31 @@ struct Args {
 
     #[arg(short, long, help("How many hoggers (threads)"), default_value_t = 1)]
     threads: usize,
+}
+
+#[cfg(target_family = "unix")]
+fn wait(msg: &str) {
+    use signal_notify::{Signal, notify};
+    println!("{}", msg);
+
+    // signal-notify doesn't provide an interface for converting integer into
+    // Signal enums
+    let signal_receiver = notify(&[
+        Signal::HUP,
+        Signal::INT,
+        Signal::QUIT,
+        Signal::ILL,
+        Signal::ABRT,
+        Signal::FPE,
+        Signal::SEGV,
+        Signal::PIPE,
+        Signal::ALRM,
+        Signal::TERM,
+        Signal::USR1,
+        Signal::USR2,
+    ]);
+    let signal = signal_receiver.recv().unwrap();
+    println!("Received signal {signal:?}");
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -146,27 +170,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         hogged_size,
         format_size(hogged_size, BINARY)
     );
-    println!("Memory Hogged. Waiting a signal to stop...");
-
-    // signal-notify doesn't provide an interface for converting integer into
-    // Signal enums
-    let signal_receiver = notify(&[
-        Signal::HUP,
-        Signal::INT,
-        Signal::QUIT,
-        Signal::ILL,
-        Signal::ABRT,
-        Signal::FPE,
-        Signal::SEGV,
-        Signal::PIPE,
-        Signal::ALRM,
-        Signal::TERM,
-        Signal::USR1,
-        Signal::USR2,
-    ]);
-    let signal = signal_receiver.recv().unwrap();
-    println!("Received signal {signal:?}");
+    wait("Memory Hogged. Waiting a signal to stop...");
     println!("Exiting");
-
     Ok(())
 }
