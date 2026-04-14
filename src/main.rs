@@ -40,6 +40,31 @@ struct Args {
     threads: usize,
 }
 
+#[cfg(target_family = "windows")]
+fn wait(msg: &str) {
+    use windows::Win32::System::Console;
+    use windows_result::BOOL;
+    println!("{}", msg);
+    unsafe extern "system" fn handler(ctrltype: u32) -> BOOL {
+        let event_type_name = match ctrltype {
+            Console::CTRL_C_EVENT => "Ctrl-C",
+            Console::CTRL_BREAK_EVENT => "Ctrl-Break",
+            Console::CTRL_CLOSE_EVENT => "Ctrl-Close",
+            Console::CTRL_LOGOFF_EVENT => "Ctrl-Logoff",
+            Console::CTRL_SHUTDOWN_EVENT => "Ctrl-Shutdown",
+            _ => "Unknown Event",
+        };
+        println!("Received event: {}", event_type_name);
+        BOOL(0)
+    }
+    unsafe {
+        let _ = Console::SetConsoleCtrlHandler(Some(handler), true);
+    }
+    loop {
+        std::thread::sleep(std::time::Duration::from_hours(1u64));
+    }
+}
+
 #[cfg(target_family = "unix")]
 fn wait(msg: &str) {
     use signal_notify::{Signal, notify};

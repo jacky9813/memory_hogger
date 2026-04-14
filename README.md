@@ -15,20 +15,15 @@ To build this program, you'll need:
 * Rust compiler >= 1.85.0 (This project requires compilers that supports
   2024 edition rust.)
 * Rust cargo package manager
-* Linux/Unix-like systems (this program require signals). These are the known
-  OS/Linux distribution to support out of the box (by just install `cargo`
-  package):
-    * Debian 13 Trixie
-    * Fedora 43
-    * RedHat Enterprise Linux or compatible distros (tested on Rocky Linux):
-        * EL8 (requires `rust-toolset` DNF module to be enabled first)
-        * EL9
-        * EL10
-    * Ubuntu 25.10
 
-For OS that doesn't have with Rust compiler from its package repository that
-supports Rust 2024 edition, remove the Rust toolchain from the OS and install
-rust toolkit with [rustup.rs](https://rustup.rs/) instead.
+This program is tested in these environment:
+
+* Fedora 43 Workstation
+    * `cargo` 1.94.1 from Fedora
+* Windows Server 2025 Datacenter with
+    * `cargo` 1.94.1 from chocolately
+    * MSYS2 package group `mingw-w64-ucrt-x86_64-toolchain` (all packages)
+    * MSYS2 `mingw-w64-ucrt-x86_64-nasm`
 
 ```shell
 #!/bin/bash
