@@ -15,9 +15,9 @@ To build this program, you'll need:
 * Rust compiler >= 1.85.0 (This project requires compilers that supports
   2024 edition rust.)
 * Rust cargo package manager
-* Linux (this program require `/dev/urandom` and libc from `glibc` or `musl`).
-  These are the known distribution to support out of the box (by just install
-  `cargo` package):
+* Linux/Unix-like systems (this program require signals). These are the known
+  OS/Linux distribution to support out of the box (by just install `cargo`
+  package):
     * Debian 13 Trixie
     * Fedora 43
     * RedHat Enterprise Linux or compatible distros (tested on Rocky Linux):
@@ -26,9 +26,9 @@ To build this program, you'll need:
         * EL10
     * Ubuntu 25.10
 
-For Linux distribution that doesn't come with Rust compiler that supports 2024
-edition, remove the Rust toolchain from your Linux distro and install rust with
-[rustup.rs](https://rustup.rs/) instead.
+For OS that doesn't have with Rust compiler from its package repository that
+supports Rust 2024 edition, remove the Rust toolchain from the OS and install
+rust toolkit with [rustup.rs](https://rustup.rs/) instead.
 
 ```shell
 #!/bin/bash

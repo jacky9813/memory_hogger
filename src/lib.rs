@@ -1,9 +1,6 @@
-use std::{fs, io::Read};
-
 fn get_rand_bytes(s: usize) -> Vec<u8> {
-    let mut f = fs::File::open("/dev/urandom").unwrap();
-    let mut buffer = vec![0; s];
-    f.read_exact(&mut buffer).unwrap();
+    let mut buffer = vec![0u8; s];
+    rand::fill(&mut buffer);
     buffer
 }
 
@@ -16,7 +13,7 @@ fn test_get_rand_bytes() {
 }
 
 fn allocate_empty(s: usize) -> Vec<u8> {
-    let buffer = vec![0; s];
+    let buffer = vec![0u8; s];
     buffer
 }
 
