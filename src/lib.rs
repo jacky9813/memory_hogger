@@ -13,8 +13,7 @@ fn test_get_rand_bytes() {
 }
 
 fn allocate_empty(s: usize) -> Vec<u8> {
-    let buffer = vec![0u8; s];
-    buffer
+    vec![0u8; s]
 }
 
 #[test]
@@ -35,7 +34,7 @@ pub fn thread_worker(size: usize, count: usize, random_value: bool) -> Vec<Vec<u
         if random_value {
             hogged.push(get_rand_bytes(size));
         } else {
-            hogged.push(allocate_empty(size))
+            hogged.push(allocate_empty(size));
         }
     }
     hogged
