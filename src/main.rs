@@ -2,7 +2,7 @@ use clap::Parser;
 use dialoguer::Confirm;
 use humansize::{BINARY, format_size};
 use signal_notify::{Signal, notify};
-use std::{error, fmt, thread};
+use std::{error, fmt, thread, time};
 use systemstat::{Platform, System};
 
 #[derive(Clone)]
@@ -108,6 +108,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    let start_time = time::Instant::now();
     for _i in 0..(args.threads - 1) {
         thread_pool.push(thread::spawn(move || {
             let partitioned_count = args.block_count / args.threads;
@@ -130,9 +131,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let result = t.join().unwrap();
         hogged.extend(result);
     }
+    let hog_elapse = start_time.elapsed();
 
     let hogged_size = memory_hogger::get_hogged_size(&hogged);
     let size_overhead = hogged_size - value_size;
+    println!("Hogging Time:        {} seconds", hog_elapse.as_secs_f64());
     println!(
         "Actual Overhead:     {} Bytes ({})",
         size_overhead,
